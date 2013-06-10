@@ -1,0 +1,85 @@
+version: 1
+
+dn: dc=ansible,dc=local
+objectClass: organization
+objectClass: dcObject
+dc: ansible
+o: Ansible testserver
+description: Ansible testserver
+
+dn: ou=computers,dc=ansible,dc=local
+objectClass: top
+objectClass: organizationalUnit
+ou: computers
+
+dn: cn=host01,ou=hosts,ou=computers,dc=ansible,dc=local
+objectClass: ansibleHost
+objectClass: top
+objectClass: device
+cn: host01
+ansibleVar: in_port=333
+
+dn: cn=host02,ou=hosts,ou=computers,dc=ansible,dc=local
+objectClass: device
+objectClass: top
+objectClass: ansibleHost
+cn: host02
+ansibleVar: ssh_port=222
+
+dn: cn=proxyservers,ou=groups,ou=computers,dc=ansible,dc=local
+objectClass: ansibleGroup
+objectClass: top
+objectClass: groupOfNames
+cn: proxyservers
+member: cn=host01,ou=computers,dc=ansible,dc=local
+member: cn=host02,ou=computers,dc=ansible,dc=local
+member: cn=webservers,ou=groups,ou=computers,dc=ansible,dc=local
+ansibleGroupVar: ansible_ssh_port=222
+ansibleGroupVar: ssh_port=222
+ansibleGroupVar: jboss=8080
+
+dn: cn=webservers,ou=groups,ou=computers,dc=ansible,dc=local
+objectClass: groupOfNames
+objectClass: top
+objectClass: ansibleGroup
+cn: webservers
+member: cn=host02,ou=computers,dc=ansible,dc=local
+member: cn=web01,ou=computers,dc=ansible,dc=local
+member: cn=web03,ou=computers,dc=ansible,dc=local
+
+dn: cn=web01,ou=hosts,ou=computers,dc=ansible,dc=local
+objectClass: device
+objectClass: top
+objectClass: ansibleHost
+cn: web01
+
+dn: cn=web03,ou=hosts,ou=computers,dc=ansible,dc=local
+objectClass: device
+objectClass: top
+objectClass: ansibleHost
+cn: web03
+
+dn: ou=hosts,ou=computers,dc=ansible,dc=local
+objectClass: top
+objectClass: organizationalUnit
+ou: hosts
+
+dn: ou=groups,ou=computers,dc=ansible,dc=local
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: cn=infra-03.prod.btr.local,ou=hosts,ou=computers,dc=ansible,dc=local
+objectClass: device
+objectClass: top
+objectClass: ansibleHost
+cn: infra-03.prod.btr.local
+ansibleVar: ansible_ssh_port=22
+
+dn: cn=infrasrv,ou=groups,ou=computers,dc=ansible,dc=local
+objectClass: groupOfNames
+objectClass: top
+objectClass: ansibleGroup
+cn: infrasrv
+member: cn=infra-03.prod.btr.local,ou=hosts,ou=computers,dc=ansible,dc=local
+
