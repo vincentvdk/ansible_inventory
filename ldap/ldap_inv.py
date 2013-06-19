@@ -19,6 +19,8 @@ import ldap
 import re
 import sys
 import operator
+import os
+import shlex
 
 try:
     import json
@@ -27,16 +29,16 @@ except ImportError:
 
 # establish connection with LDAP server
 try:
-    l = ldap.initialize("ldap://")
-    username = "cn=manager,dc=ansible,dc=local"
-    password = ""
+    l = ldap.initialize(os.getenv("LDAPHOST", "ldap://"))
+    username = os.getenv("LDAPBINDDN", "cn=manager,dc=ansible,dc=local")
+    password = os.getenv("LDAPBINDPW", "")
     l.bind_s(username, password, ldap.AUTH_SIMPLE)
 
 except ldap.LDAPError, e:
     print e
 
 # LDAP variables
-baseDN = 'ou=computers, dc=ansible, dc=local'
+baseDN = os.getenv("LDAPBASEDN", 'ou=computers, dc=ansible, dc=local')
 searchScope = ldap.SCOPE_SUBTREE
 attrs = None
 
@@ -124,13 +126,21 @@ def getdetails(host):
     result = l.search_s(baseDN, searchScope, hostsearchFilter)
     for item in result:
         res = dict(item[1])
-        for key, value in res.iteritems():
-            #if key != "objectClass":
+        for key, values in res.iteritems():
             if key == "ansibleVar":
-                hostvar = generatekv(value[0])
-                varlist.append(hostvar)
+                for val in values:
+                    # hostvar = generatekv(val)
+                    # varlist.append(hostvar)
+
+                    # Ensure we safely convert values of the form 
+                    # ansibleVar: key=val=x=y=z
+                    args = {}
+                    for arg in shlex.split(val):
+                        k, v = arg.split('=', 1)
+                        varlist.append((k, v))
         details = dict(varlist)
-        print json.dumps(details, sort_keys=True, indent=2)
+
+    print json.dumps(details, sort_keys=True, indent=2)
     l.unbind_s()
 
 # ----------------------------------------------------------------------
