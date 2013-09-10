@@ -23,22 +23,23 @@ import os
 import shlex
 
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 # establish connection with LDAP server
 try:
     l = ldap.initialize(os.getenv("LDAPHOST", "ldap://"))
     username = os.getenv("LDAPBINDDN", "cn=manager,dc=ansible,dc=local")
     password = os.getenv("LDAPBINDPW", "")
+    l.set_option(ldap.OPT_PROTOCOL_VERSION,ldap.VERSION3)
     l.bind_s(username, password, ldap.AUTH_SIMPLE)
 
 except ldap.LDAPError, e:
     print e
 
 # LDAP variables
-baseDN = os.getenv("LDAPBASEDN", 'ou=computers, dc=ansible, dc=local')
+baseDN = os.getenv("LDAPBASEDN", 'ou=ansible, dc=ansible, dc=local')
 searchScope = ldap.SCOPE_SUBTREE
 attrs = None
 
@@ -69,7 +70,7 @@ def generatekv(ansibleAttribute):
 #
 def detect_group():
     groupsearchfilter = '(objectClass=ansibleGroup)'
-    result = l.search_s(baseDN, searchScope, groupsearchFilter)
+    result = l.search_s(baseDN, searchScope, groupsearchfilter)
     groups = []
     for item in result:
         res = item[1]
@@ -84,6 +85,10 @@ def getlist():
     try:
         inv = {}
         result = l.search_s(baseDN, searchScope, groupsearchFilter)
+        # putting group list here otherwise it gets called for each available
+        # group in ldap -> keeps growing
+        groups = detect_group()
+        print groups
         for item in result:
             res = item[1]
             group = res['cn'][0]
@@ -91,14 +96,13 @@ def getlist():
             varlist = [ ]
             children = [ ]
             res = dict(item[1])
+            #print res
             for key, value in res.iteritems():
                 if key == "member":
                     for item in value:
                         host = re.match(r'cn=([^,]*)', item)
                         host = host.group(1)
-                        #print "host: %s" % host
-                        #print "group: %s" % group
-                        if host in detect_group():
+                        if host in groups:
                             children.append(host)
                         else:
                             hostgroup.append(host)
@@ -129,14 +133,12 @@ def getdetails(host):
         for key, values in res.iteritems():
             if key == "ansibleVar":
                 for val in values:
-                    # hostvar = generatekv(val)
-                    # varlist.append(hostvar)
-
                     # Ensure we safely convert values of the form 
                     # ansibleVar: key=val=x=y=z
                     args = {}
                     for arg in shlex.split(val):
                         k, v = arg.split('=', 1)
+                        print "%s %s" % (k,v)
                         varlist.append((k, v))
         details = dict(varlist)
 
@@ -147,10 +149,6 @@ def getdetails(host):
 # get list of machines from RHN
 if len(sys.argv) == 2 and (sys.argv[1] == '--list'):
     getlist()
-
-#if len(sys.argv) == 2 and (sys.argv[1] == '--test'):
-    #generatekv('ssh_port=222')
-    #detect_group()
 
 #get details from a host
 elif len(sys.argv) == 3 and (sys.argv[1] == '--host'):
