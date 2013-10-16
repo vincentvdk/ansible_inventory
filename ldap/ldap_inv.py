@@ -29,9 +29,9 @@ except ImportError:
 
 # establish connection with LDAP server
 try:
-    l = ldap.initialize(os.getenv("LDAPHOST", "ldap://infra-08.prod.btr.local"))
-    username = os.getenv("LDAPBINDDN", "cn=manager,dc=ansible,dc=local")
-    password = os.getenv("LDAPBINDPW", "ldapserver")
+    l = ldap.initialize(os.getenv("LDAPHOST", ""))
+    username = os.getenv("LDAPBINDDN", "")
+    password = os.getenv("LDAPBINDPW", "")
     l.set_option(ldap.OPT_PROTOCOL_VERSION,ldap.VERSION3)
     l.bind_s(username, password, ldap.AUTH_SIMPLE)
 
@@ -39,7 +39,7 @@ except ldap.LDAPError, e:
     print e
 
 # LDAP variables
-baseDN = os.getenv("LDAPBASEDN", 'ou=ansible-dev, dc=ansible, dc=local')
+baseDN = os.getenv("LDAPBASEDN", 'ou=ansible, dc=ansible, dc=local')
 searchScope = ldap.SCOPE_SUBTREE
 attrs = None
 
