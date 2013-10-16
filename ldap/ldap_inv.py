@@ -39,7 +39,7 @@ except ldap.LDAPError, e:
     print e
 
 # LDAP variables
-baseDN = os.getenv("LDAPBASEDN", 'ou=ansible-dev, dc=ansible, dc=local')
+baseDN = os.getenv("LDAPBASEDN", 'ou=ansible, dc=ansible, dc=local')
 searchScope = ldap.SCOPE_SUBTREE
 attrs = None
 
@@ -136,8 +136,14 @@ def getdetails(host):
                     # ansibleVar: key=val=x=y=z
                     for arg in shlex.split(val):
                         k, v = arg.split('=', 1)
-                        valuelist = v.split(',')
-                        varlist.append((k, valuelist))
+                        # don't create list when only one item is found
+                        items = v.split()
+                        if len(items) == 1:
+                            varlist.append((k, v))
+                        # return list as value when more items are found
+                        else:
+                            valuelist = v.split(',')
+                            varlist.append((k, valuelist))
         details = dict(varlist)
 
     print json.dumps(details, sort_keys=True, indent=2)
