@@ -29,9 +29,9 @@ except ImportError:
 
 # establish connection with LDAP server
 try:
-    l = ldap.initialize(os.getenv("LDAPHOST", "ldap://"))
+    l = ldap.initialize(os.getenv("LDAPHOST", "ldap://infra-08.prod.btr.local"))
     username = os.getenv("LDAPBINDDN", "cn=manager,dc=ansible,dc=local")
-    password = os.getenv("LDAPBINDPW", "")
+    password = os.getenv("LDAPBINDPW", "ldapserver")
     l.set_option(ldap.OPT_PROTOCOL_VERSION,ldap.VERSION3)
     l.bind_s(username, password, ldap.AUTH_SIMPLE)
 
@@ -39,7 +39,7 @@ except ldap.LDAPError, e:
     print e
 
 # LDAP variables
-baseDN = os.getenv("LDAPBASEDN", 'ou=ansible, dc=ansible, dc=local')
+baseDN = os.getenv("LDAPBASEDN", 'ou=ansible-dev, dc=ansible, dc=local')
 searchScope = ldap.SCOPE_SUBTREE
 attrs = None
 
@@ -88,7 +88,6 @@ def getlist():
         # putting group list here otherwise it gets called for each available
         # group in ldap -> keeps growing
         groups = detect_group()
-        print groups
         for item in result:
             res = item[1]
             group = res['cn'][0]
@@ -133,13 +132,12 @@ def getdetails(host):
         for key, values in res.iteritems():
             if key == "ansibleVar":
                 for val in values:
-                    # Ensure we safely convert values of the form 
+                    # Ensure we safely convert values of the form
                     # ansibleVar: key=val=x=y=z
-                    args = {}
                     for arg in shlex.split(val):
                         k, v = arg.split('=', 1)
-                        print "%s %s" % (k,v)
-                        varlist.append((k, v))
+                        valuelist = v.split(',')
+                        varlist.append((k, valuelist))
         details = dict(varlist)
 
     print json.dumps(details, sort_keys=True, indent=2)
