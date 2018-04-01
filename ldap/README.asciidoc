@@ -10,7 +10,7 @@ Included is an LDIF export so you can get an idea of the LDAP structure.
 - groups need to be groupOfNames
 - you can have a group inside a group. These wil be listed as children
 - The directory is extended with a custom schema created by @jpmens. The file
-  is included as ansible.schema.
+  is included as ansible.schema and ansible.ldif for use with OLC.
 
 example output
 --------------
