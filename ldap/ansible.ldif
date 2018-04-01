@@ -49,14 +49,11 @@
 # 
 #	1.3.6.1.4.1.7637.70.1.2                         LDAP AttributeTypes
 #
-
-
 # ansibleVar: ansible_ssh_host=localhost
-
+dn: cn=ansible,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: core
 olcattributetypes: ( 1.3.6.1.4.1.7637.70.1.2.1 NAME 'ansibleVar' DESC 'A variable=value setting for an Ansible host' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{1024} )
-
 olcattributetypes: ( 1.3.6.1.4.1.7637.70.1.2.2 NAME 'ansibleGroupVar' DESC 'A variable=value setting for an Ansible Group' EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{1024} )
-
 olcobjectclasses: ( 1.3.6.1.4.1.7637.70.1.1.1 NAME 'ansibleHost' DESC 'Ansible host entry' SUP top AUXILIARY MAY ( ansibleVar  ) )
-
 olcobjectclasses: ( 1.3.6.1.4.1.7637.70.1.1.2 NAME 'ansibleGroup' DESC 'Ansible group entry' SUP top AUXILIARY MAY ( ansibleGroupVar  ) )
